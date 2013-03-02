@@ -22,6 +22,8 @@ public class MainActivity extends Activity {
 
 	private DataBaseHelper myDbHelper;
 	private EditText mEditText;
+	private WebView mResultWebView;
+	private HtmlRenderer mRenderer;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -29,7 +31,6 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		
 		
-//		 DataBaseHelper myDbHelper = new DataBaseHelper();
 		myDbHelper = new DataBaseHelper(this);
 		try {
 			myDbHelper.createDataBase();
@@ -42,10 +43,13 @@ public class MainActivity extends Activity {
 		} catch (SQLException sqle) {
 			throw sqle;
 		}
+		mRenderer = new HtmlRenderer(this);
+		
+		mResultWebView = (WebView) findViewById(R.id.webview_result);
+		mResultWebView.getSettings().setJavaScriptEnabled(true);		
 		
 		mEditText = (EditText) findViewById(R.id.edit_message);
-		mEditText.setImeActionLabel("Chatta", KeyEvent.KEYCODE_ENTER);
-		
+		mEditText.setImeActionLabel("Chatta", KeyEvent.KEYCODE_ENTER);		
 		mEditText.setOnEditorActionListener(new OnEditorActionListener() {
 		    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 		    	// http://stackoverflow.com/questions/9327458/get-keycode-0-instead-of-66-when-enter-is-pressed-on-my-computer-keyboard
@@ -56,7 +60,6 @@ public class MainActivity extends Activity {
 		        return false;
 		    }
 		});
-		
 	}
 
 	@Override
@@ -65,23 +68,17 @@ public class MainActivity extends Activity {
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
-
 	
 	public void performSearch() {
 		
     	InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(mEditText.getWindowToken(), 0);
 
+		String query = mEditText.getText().toString();		
+		String result = myDbHelper.performQuery(query);
 		
-		String message = mEditText.getText().toString();
-		
-		message = myDbHelper.performQuery(message);
-
-		
-		WebView resultWebView = (WebView) findViewById(R.id.webview_result);
-		resultWebView.getSettings().setJavaScriptEnabled(true);		
-		resultWebView.loadDataWithBaseURL("file:///android_res/raw/",
-				"<html><body>" + message + "</body></html>",
+		mResultWebView.loadDataWithBaseURL("file:///android_res/raw/",
+				mRenderer.render(result),
 				"text/html",
                 "UTF-8", null);
     }

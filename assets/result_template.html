@@ -1,0 +1,107 @@
+<html>
+<head>
+	<style>
+		body {
+			font-family:"arial","sans-serif";
+			font-size: 90%;
+			margin:0;
+			padding:0;
+			height:100%;
+		}
+		#wrapper {
+			min-height:100%;
+			position:relative;
+		}
+		#header {
+			padding:3px;
+			background:#ee5;
+		}
+		#content {
+			padding:10px;
+			padding-bottom:100px; /* Height of the footer element plus its padding */
+		}
+		#footer {
+			padding: 10px;
+			padding-bottom:0px;
+			font-size: 80%;
+			width:100%;
+			height:80px;
+			position:absolute;
+			bottom:0;
+			left:0;
+			background:#ee5;
+		}
+		table.result {
+			border-collapse: collapse;
+		}
+		th.result, td.result {
+			border: 1px #000 solid;
+			padding: 2px 10px 2px 10px; /*top right bottom left*/
+			font-size: 90%;
+		}
+		th.result {
+			background: #ee5;
+		}
+		td {
+			padding-top: 3px;
+			padding-bottom: 3px;
+			padding-right: 15px;
+			padding-left: 15px;
+			font-size: 90%;
+		}
+		.geschlecht, .gener {
+			color: #666666;
+			font-style: italic;
+		}
+		.bereich, .chomp {
+			color: #666666;
+		}
+		.wort, .pled {
+		}
+		
+		a.xref:link, a.xref:visited {
+			text-decoration:none;
+			color:#000000;
+			font-style: oblique;
+		}
+		a.xref:hover, a.xref:active {
+			text-decoration:underline;
+			color:#000000;
+			font-style: oblique;
+		}
+
+		a.clipb:link, a.clipb:visited {
+			text-decoration:none;
+			color:#000000;
+		}
+		a.clipbf:hover, a.clipb:active {
+			text-decoration:underline;
+			color:#000000;
+		}
+		
+	</style>
+	<script type="text/javascript">
+		function clipb (text) {
+			window.prompt ("Copchar al arcun d'immez: Ctrl+C, Enter", text);
+		}
+	</script>
+</head>
+<body>
+    <div id="wrapper">
+	    <div id="header"></div>
+	    <div id="content">
+
+			<!--	
+			<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+			-->
+		    
+			$RESULT
+			
+		</div>
+			        
+	    <div id="footer">
+			Copyright &copy; cls et al 2013 and following. All other trademarks, copyrights, contents are property of their respective owners. 
+	    </div>
+    </div>
+</body>
+</html>
