@@ -1,2 +1,3 @@
-put vallader.db and puter.db in this directory
-
+vallader.db and puter.db data bases are mapped into assets from the dicziunari
+git project located at /database/ using symbolic links. Make sure you prepared
+them with './dicziunari.py -v -s' resp.  './dicziunari.py -p -s'.
