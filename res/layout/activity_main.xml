@@ -4,19 +4,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal" >
+    android:orientation="vertical" >
 
-   	<EditText android:id="@+id/edit_message"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-		android:layout_weight="1"
-        android:hint="@string/edit_message" />
-   		
-   	 <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/button_send"
-        android:onClick="sendMessage" />
-   	
+	<include layout="@layout/search_bar" />
+	
+    <WebView
+        android:layout_weight="1"
+        android:layout_width="match_parent"
+        android:layout_height="0dip"
+        android:id="@+id/webview_result"
+    	/>
 </LinearLayout>
 

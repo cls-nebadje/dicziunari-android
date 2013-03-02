@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
+import android.webkit.WebView;
 import android.widget.EditText;
 
 public class MainActivity extends Activity {
@@ -27,10 +28,19 @@ public class MainActivity extends Activity {
 	/** Called when the user clicks the Send button */
 	public void sendMessage(View view) {
 	    // Do something in response to button
-		Intent intent = new Intent(this, DisplayMessageActivity.class);
+//		Intent intent = new Intent(this, DisplayMessageActivity.class);
+//		EditText editText = (EditText) findViewById(R.id.edit_message);
+//		String message = editText.getText().toString();
+//		intent.putExtra(EXTRA_MESSAGE, message);
+//		startActivity(intent);
+		
 		EditText editText = (EditText) findViewById(R.id.edit_message);
 		String message = editText.getText().toString();
-		intent.putExtra(EXTRA_MESSAGE, message);
-		startActivity(intent);
+		WebView resultWebView = (WebView) findViewById(R.id.webview_result);
+		resultWebView.getSettings().setJavaScriptEnabled(true);		
+		resultWebView.loadDataWithBaseURL("file:///android_res/raw/",
+				"<html><body>" + message + "</body></html>",
+				"text/html",
+                "UTF-8", null);
 	}
 }
