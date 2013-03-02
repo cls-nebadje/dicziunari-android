@@ -3,11 +3,11 @@
 
     <string name="app_name">Dicziunari</string>
     <string name="action_settings">Settings</string>
-    <string name="edit_message">Enter a message</string>
-    <string name="button_send">Send</string>
+    <string name="edit_message">Term</string>
+    <string name="button_send">Chatta</string>
     <string name="menu_settings">Settings</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="hello_world">Hello world!</string>
 	<string name="title_activity_display_message">My Message</string>
-    
+    <string name="search_action_label">Action</string>
 </resources>
