@@ -17,8 +17,9 @@
    	    android:imeOptions="actionSearch"
 		android:inputType="text"
    	    />
-   		
-   	 <Button
+
+    <!-- android:background="@drawable/delete"  -->
+	<Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/button_send"

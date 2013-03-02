@@ -205,6 +205,9 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 				{% endfor %}
 			    </table>
  */
+		if (term.length() == 0) {
+			return "";
+		}
 		Cursor cursor = myDataBase.query("dicziunari",
 				new String[] { "m", "n" },
 				"m like ? OR n like ?",
