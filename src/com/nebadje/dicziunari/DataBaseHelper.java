@@ -136,82 +136,86 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 	}
 
+	/*
+    def fmt(out, key, inp):
+        inp = inp.strip()
+        if inp is not None and len(inp) > 0:
+            txt = u'<span class="%s">%s%s%s</span>' % (key[0], key[1], escape(inp), key[2])
+            if key[0] in [u'wort', u'pled']:
+                # TODO regex "cf. auch: vergleichen" (low prio - only 5 words)
+                p = inp.find(u'cf. ')
+                if p != -1:
+                    newTerm = inp[p+3:].strip()
+                    # We should generate the relative path by our app url part
+                    # and not hard-code it here
+                    txt = '<a class="xref" href="/tschercha/?idiom=%s&term=%s">%s</a>' % \
+                           (IDIOM_NAMES[idiom], urlquote(newTerm), txt)
+                else:
+                    cbTxt = inp.replace("\"", "")
+                    txt = '<a class="clipb" href=\'javascript:clipb("%s")\'>%s</a>' % (cbTxt, txt)
+            out.append(txt)
+
+	 */
+	private static String fmt(String out, String[] key, Cursor cursor) {
+		String inp = cursor.getString(cursor.getColumnIndex(key[0]));
+    	if (inp == null) {
+    		return out;
+    	}
+        inp = inp.trim();
+        if (inp.length() > 0) {
+        	String fmtStr = " <span class=\"%s\">" + key[2] + "</span> ";
+            String txt = String.format(fmtStr, key[1], TextUtils.htmlEncode(inp));
+            return out + txt;
+        }
+        return out;
+    }
+	
+	private String[][] keysDe = {
+			new String[]{"m",  "wort",        "%s" },
+			new String[]{"tt", "beugung",     "%s" },
+			new String[]{"ww", "geschlecht", "{%s}"},
+			new String[]{"ii", "bereich",    "[%s]"},
+		};
+	private String[][] keysRum = {
+			new String[]{"n",  "pled",        "%s" },
+			new String[]{"ll", "gener",      "{%s}"},
+			new String[]{"rr", "chomp",      "[%s]"},
+		};
+
 	public String performQuery(String term) {
 		
 		String result = "";
-		
-/*
- *                            # de, beugungen, geschl, bereich 
-                                            # rum, geschl, bereich.
-    cursor.execute("SELECT m, tt, ww, ii,   n, ll, rr FROM dicziunari WHERE m LIKE ? OR n LIKE ? LIMIT 0, ?",
-                   ("%%%s%%" % query, "%%%s%%" % query, limit))
-    rows = cursor.fetchall()
-    res = []
-    for row in rows:
-        keys = [(u'wort',       u'',  u'' ),
-                (u'beugung',    u'',  u'' ),
-                (u'geschlecht', u'{', u'}'),
-                (u'bereich',    u'[', u']'),
-                (u'pled',       u'',  u'' ),
-                (u'gener',      u'{', u'}'),
-                (u'chomp',      u'[', u']'),]
-        def fmt(out, key, inp):
-            inp = inp.strip()
-            if inp is not None and len(inp) > 0:
-                txt = u'<span class="%s">%s%s%s</span>' % (key[0], key[1], escape(inp), key[2])
-                if key[0] in [u'wort', u'pled']:
-                    # TODO regex "cf. auch: vergleichen" (low prio - only 5 words)
-                    p = inp.find(u'cf. ')
-                    if p != -1:
-                        newTerm = inp[p+3:].strip()
-                        # We should generate the relative path by our app url part
-                        # and not hard-code it here
-                        txt = '<a class="xref" href="/tschercha/?idiom=%s&term=%s">%s</a>' % \
-                               (IDIOM_NAMES[idiom], urlquote(newTerm), txt)
-                    else:
-                        cbTxt = inp.replace("\"", "")
-                        txt = '<a class="clipb" href=\'javascript:clipb("%s")\'>%s</a>' % (cbTxt, txt)
-                out.append(txt)
-                    
-        de = []
-        rum = []
-        for i in range(4):
-            fmt(de, keys[i], row[i])
-        for i in range(4, len(row)):
-            fmt(rum, keys[i], row[i])
-        res.append((" ".join(de), " ".join(rum)))
 
-
-
-			    <table class="result">
-			    <tr><th class="result">Tudais-ch</th><th class="result">{{ idiom }}</th></tr>
-				{% for tud, rum in result %}
-					<tr><td class="result">{{tud|safe}}</td><td class="result">{{rum|safe}}<td>
-				{% endfor %}
-			    </table>
- */
 		if (term.length() == 0) {
 			return "";
 		}
 		int limit = 50;
 		Cursor cursor = myDataBase.query("dicziunari",
-				new String[] { "m", "n" },
+				new String[] {
+					// deutsch, beugungen, geschl, bereich 
+					"m", "tt", "ww", "ii",
+	                // rumantsch, gener, chomp
+					"n", "ll", "rr" },
 				"m like ? OR n like ? LIMIT 0, ?",
 				new String[] { "%"+ term +"%", "%"+ term +"%", String.valueOf(limit)},
 				null,
 				null,
 				null);
 		if (cursor != null) {
-			if (cursor.moveToFirst()) {
-				int wortIdx = cursor.getColumnIndex("m");
-				int pledIdx = cursor.getColumnIndex("n");
+			if (cursor.moveToFirst()) {								
 				do {
-					String wort = cursor.getString(wortIdx);
-					String pled = cursor.getString(pledIdx);
+					String de = "";
+					for (int i = 0; i < keysDe.length; i++) {
+						de = fmt(de, keysDe[i], cursor);
+					}
+
+					String rum = "";
+					for (int i = 0; i < keysRum.length; i++) {
+						rum = fmt(rum, keysRum[i], cursor);
+					}
 					
-					result += String.format("<tr><td class=\"result\">%s</td><td class=\"result\">%s</td>\n",
-							TextUtils.htmlEncode(wort),
-							TextUtils.htmlEncode(pled));					
+					result += String.format("<tr><td class=\"result\">%s</td>",        de);
+					result += String.format(    "<td class=\"result\">%s</td></tr>\n", rum);
 				} while (cursor.moveToNext());
 			}
 		}
