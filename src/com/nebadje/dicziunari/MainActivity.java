@@ -47,6 +47,7 @@ public class MainActivity extends Activity {
 		} catch (SQLException sqle) {
 			throw sqle;
 		}
+		mIdiom = Idiom.Puter;
 		mIdiom = Idiom.Vallader;
 		
 		mRenderer = new HtmlRenderer(this);

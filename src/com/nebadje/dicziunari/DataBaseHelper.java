@@ -163,23 +163,23 @@ public class DataBaseHelper extends SQLiteOpenHelper {
     	}
         inp = inp.trim();
         if (inp.length() > 0) {
-        	String fmtStr = " <span class=\"%s\">" + key[2] + "</span> ";
-            String txt = String.format(fmtStr, key[1], TextUtils.htmlEncode(inp));
+        	String fmtStr = " <span class=\"%s\">" + key[1] + "</span> ";
+            String txt = String.format(fmtStr, key[0], TextUtils.htmlEncode(inp));
             return out + txt;
         }
         return out;
     }
-	
+
 	private String[][] keysDe = {
-			new String[]{"m",  "wort",        "%s" },
-			new String[]{"tt", "beugung",     "%s" },
-			new String[]{"ww", "geschlecht", "{%s}"},
-			new String[]{"ii", "bereich",    "[%s]"},
+			new String[]{"wort",        "%s" },
+			new String[]{"beugung",     "%s" },
+			new String[]{"geschlecht", "{%s}"},
+			new String[]{"bereich",    "[%s]"},
 		};
 	private String[][] keysRum = {
-			new String[]{"n",  "pled",        "%s" },
-			new String[]{"ll", "gener",      "{%s}"},
-			new String[]{"rr", "chomp",      "[%s]"},
+			new String[]{"pled",        "%s" },
+			new String[]{"gener",      "{%s}"},
+			new String[]{"chomp",      "[%s]"},
 		};
 
 	public String performQuery(String term) {
@@ -192,11 +192,9 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 		int limit = 50;
 		Cursor cursor = myDataBase.query("dicziunari",
 				new String[] {
-					// deutsch, beugungen, geschl, bereich 
-					"m", "tt", "ww", "ii",
-	                // rumantsch, gener, chomp
-					"n", "ll", "rr" },
-				"m like ? OR n like ? LIMIT 0, ?",
+					"wort", "beugung", "geschlecht", "bereich",
+					"pled", "gener", "chomp" },
+				"wort LIKE ? OR pled LIKE ? LIMIT 0, ?",
 				new String[] { "%"+ term +"%", "%"+ term +"%", String.valueOf(limit)},
 				null,
 				null,
