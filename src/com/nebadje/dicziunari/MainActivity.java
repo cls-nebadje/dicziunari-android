@@ -1,10 +1,7 @@
 package com.nebadje.dicziunari;
 
-import java.io.IOException;
-
 import android.app.Activity;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.database.SQLException;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -18,6 +15,7 @@ import android.view.View.OnTouchListener;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
@@ -26,7 +24,11 @@ public class MainActivity extends Activity {
 
 	public final static String EXTRA_MESSAGE = "com.nebadje.dicziunari.MESSAGE";
 
-	private DataBaseHelper myDbHelper;
+	public enum Idiom {Vallader, Puter};
+	
+	private DataBaseHelper mDbHelperVallader;
+	private DataBaseHelper mDbHelperPuter;
+	private Idiom mIdiom;
 	private EditText mEditText;
 	private WebView mResultWebView;
 	private HtmlRenderer mRenderer;
@@ -37,18 +39,16 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
-		myDbHelper = new DataBaseHelper(this);
+		mDbHelperVallader = new DataBaseHelper(this, "vallader.db");
+		mDbHelperPuter = new DataBaseHelper(this, "puter.db");
 		try {
-			myDbHelper.createDataBase();
-		} catch (IOException ioe) {
-			throw new Error("Unable to create database");
-		}
-
-		try {
-			myDbHelper.openDataBase();
+			mDbHelperVallader.openDataBase();
+			mDbHelperPuter.openDataBase();
 		} catch (SQLException sqle) {
 			throw sqle;
 		}
+		mIdiom = Idiom.Vallader;
+		
 		mRenderer = new HtmlRenderer(this);
 		
 		mResultWebView = (WebView) findViewById(R.id.webview_result);
@@ -59,8 +59,15 @@ public class MainActivity extends Activity {
 		mResultWebView.setScrollbarFadingEnabled(true);
 		mResultWebView.getSettings().setLoadsImagesAutomatically(true);
 
-		// Load the URLs inside the WebView, not in the external web browser
-//		mResultWebView.setWebViewClient(new WebViewClient());
+		mResultWebView.setWebViewClient(new WebViewClient() {
+			public boolean shouldOverrideUrlLoading (WebView view, String url) {
+				if (url.startsWith("dcznr://")) {
+					System.out.printf("Web view url override: %s", url);
+				}
+				return true;
+			}
+			
+		});
 		
 		// http://stackoverflow.com/questions/4175398/clear-edittext-on-click
 		mEditText = (EditText) findViewById(R.id.edit_message);
@@ -136,8 +143,12 @@ public class MainActivity extends Activity {
 		String query = mEditText.getText().toString();
 		
 		// Spawn background thread which posts result...
-		String result = myDbHelper.performQuery(query);
-
+		String result;
+		if (mIdiom == Idiom.Vallader) {
+			result = mDbHelperVallader.performQuery(query);
+		} else {
+			result = mDbHelperPuter.performQuery(query);
+		}
 		mLastResult = mRenderer.render(result);
 		mResultWebView.loadDataWithBaseURL("file:///android_res/raw/",
 				mLastResult, "text/html", "UTF-8", null);

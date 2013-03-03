@@ -18,14 +18,9 @@ import android.text.TextUtils;
 
 public class DataBaseHelper extends SQLiteOpenHelper {
 
-	// The Android's default system path of your application database.
-	// Description	Resource	Path	Location	Type
-
-	private static String DB_NAME = "vallader.db";
-
-	private SQLiteDatabase myDataBase;
-
-	private final Context myContext;
+	private String mDbName = "vallader.db";
+	private SQLiteDatabase myDataBase = null;
+	private Context myContext = null;
 
 	/**
 	 * Constructor Takes and keeps a reference of the passed context in order to
@@ -33,24 +28,21 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 	 * 
 	 * @param context
 	 */
-	public DataBaseHelper(Context context) {
-
-		super(context, DB_NAME, null, 1);
-		this.myContext = context;
+	public DataBaseHelper(Context context, String dbName) {
+		super(context, dbName, null, 1);
+		mDbName = dbName;
+		myContext = context;
 	}
 
 	/**
 	 * Creates a empty database on the system and rewrites it with your own
 	 * database.
 	 * */
-	public void createDataBase() throws IOException {
+	private void createDataBase() throws IOException {
 
-		boolean dbExist = checkDataBase();
-
-		if (dbExist) {
+		if (checkDataBase()) {
 			// do nothing - database already exist
 		} else {
-
 			// By calling this method and empty database will be created into
 			// the default system path
 			// of your application so we are gonna be able to overwrite that
@@ -58,19 +50,15 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 			this.getReadableDatabase();
 
 			try {
-
 				copyDataBase();
-
 			} catch (IOException e) {
-
 				throw new Error("Error copying database");
-
 			}
 		}
 
 	}
 	private String getDbPath() {
-		return myContext.getFilesDir().getPath() + "/" + DB_NAME;
+		return myContext.getFilesDir().getPath() + "/" + mDbName;
 	}
 	/**
 	 * Check if the database already exist to avoid re-copying the file each
@@ -79,37 +67,31 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 	 * @return true if it exists, false if it doesn't
 	 */
 	private boolean checkDataBase() {
-
-		SQLiteDatabase checkDB = null;
-
 		try {
-			checkDB = SQLiteDatabase.openDatabase(getDbPath(), null,
+			SQLiteDatabase db = SQLiteDatabase.openDatabase(getDbPath(), null,
 					SQLiteDatabase.OPEN_READONLY);
+			db.close();
 		} catch (SQLiteException e) {
 			// database does't exist yet.
+			return false;
 		}
-
-		if (checkDB != null) {
-			checkDB.close();
-		}
-
-		return checkDB != null ? true : false;
+		return true;
 	}
 
 	/**
 	 * Copies your database from your local assets-folder to the just created
 	 * empty database in the system folder, from where it can be accessed and
-	 * handled. This is done by transfering bytestream.
+	 * handled. This is done by transferring bytestream.
 	 * */
 	private void copyDataBase() throws IOException {
 
 		// Open your local db as the input stream
-		InputStream myInput = myContext.getAssets().open(DB_NAME);
+		InputStream myInput = myContext.getAssets().open(mDbName);
 
 		// Open the empty db as the output stream
 		OutputStream myOutput = new FileOutputStream(getDbPath());
 
-		// transfer bytes from the inputfile to the outputfile
+		// transfer bytes from the input file to the output file
 		byte[] buffer = new byte[1024];
 		int length;
 		while ((length = myInput.read(buffer)) > 0) {
@@ -120,35 +102,38 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 		myOutput.flush();
 		myOutput.close();
 		myInput.close();
-
 	}
 
-	public void openDataBase() throws SQLException {
+	public void openDataBase() throws SQLException, Error {
 
-		// Open the database
-		myDataBase = SQLiteDatabase.openDatabase(getDbPath(), null,
-				SQLiteDatabase.OPEN_READONLY);
-
+		if (myDataBase == null) {
+			try {
+				createDataBase();
+			} catch (IOException e) {
+				throw new Error(String.format("Failed to create %s database.", mDbName));
+			}
+			// Open the database
+			myDataBase = SQLiteDatabase.openDatabase(getDbPath(), null,
+					SQLiteDatabase.OPEN_READONLY);
+		}
 	}
 
 	@Override
 	public synchronized void close() {
 
-		if (myDataBase != null)
+		if (myDataBase != null) {
 			myDataBase.close();
-
+			myDataBase = null;
+		}
 		super.close();
-
 	}
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
-
 	}
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
 	}
 
 	public String performQuery(String term) {
@@ -208,10 +193,11 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 		if (term.length() == 0) {
 			return "";
 		}
+		int limit = 50;
 		Cursor cursor = myDataBase.query("dicziunari",
 				new String[] { "m", "n" },
-				"m like ? OR n like ?",
-				new String[] { "%"+ term +"%", "%"+ term +"%"},
+				"m like ? OR n like ? LIMIT 0, ?",
+				new String[] { "%"+ term +"%", "%"+ term +"%", String.valueOf(limit)},
 				null,
 				null,
 				null);
@@ -232,6 +218,4 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 				
 		return result;
 	}
-
-
 }
