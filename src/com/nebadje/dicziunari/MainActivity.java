@@ -1,12 +1,18 @@
 package com.nebadje.dicziunari;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+
 import android.app.Activity;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.database.SQLException;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MotionEvent;
@@ -62,8 +68,31 @@ public class MainActivity extends Activity {
 
 		mResultWebView.setWebViewClient(new WebViewClient() {
 			public boolean shouldOverrideUrlLoading (WebView view, String url) {
-				if (url.startsWith("dcznr://")) {
-					System.out.printf("Web view url override: %s", url);
+				String dicziunariClipboardTag = "dcznrcb://";
+				String dicziunariXrefTag = "dcznrxr://";
+				if (url.startsWith(dicziunariClipboardTag)) {
+					String word = url.substring(dicziunariClipboardTag.length());
+					try {
+						word = URLDecoder.decode(word, "utf-8");
+						word = word.trim();
+						if (word.length() > 0) {
+							ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+							ClipData clip = ClipData.newPlainText("Dicziunari", word);
+							clipboard.setPrimaryClip(clip);
+						}
+					} catch (UnsupportedEncodingException e) {
+					}
+				} else if (url.startsWith(dicziunariXrefTag)) {
+					String word = url.substring(dicziunariXrefTag.length());
+					try {
+						word = URLDecoder.decode(word, "utf-8");
+						word = word.trim();
+						if (word.length() > 0) {
+							mEditText.setText(word, TextView.BufferType.EDITABLE);
+							search(word);
+						}
+					} catch (UnsupportedEncodingException e) {
+					}
 				}
 				return true;
 			}
@@ -142,7 +171,9 @@ public class MainActivity extends Activity {
 		imm.hideSoftInputFromWindow(mEditText.getWindowToken(), 0);
 
 		String query = mEditText.getText().toString();
-		
+		search(query);
+	}
+	public void search(String query) {
 		// Spawn background thread which posts result...
 		String result;
 		if (mIdiom == Idiom.Vallader) {

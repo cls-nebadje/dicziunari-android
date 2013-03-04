@@ -7,6 +7,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -156,7 +158,18 @@ public class DataBaseHelper extends SQLiteOpenHelper {
             out.append(txt)
 
 	 */
-	private static String fmt(String out, String[] key, Cursor cursor) {
+	public static String wrapInternalLink(String linkClass, String linkPrefix, String item, String node) {
+		item = item.replaceAll("\"", "");
+		item = item.trim();
+		try {
+			item = URLEncoder.encode(item, "utf-8");
+    		node = String.format("<a class=\"%s\" href=\"%s://%s\">%s</a>", linkClass, linkPrefix, item, node);
+		} catch (UnsupportedEncodingException e) {
+		}
+		return node;
+	}
+	
+	public static String fmt(String out, String[] key, Cursor cursor) {
 		String inp = cursor.getString(cursor.getColumnIndex(key[0]));
     	if (inp == null) {
     		return out;
@@ -165,6 +178,29 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         if (inp.length() > 0) {
         	String fmtStr = " <span class=\"%s\">" + key[1] + "</span> ";
             String txt = String.format(fmtStr, key[0], TextUtils.htmlEncode(inp));
+            if (key[0] == "wort" || key[0] == "pled") {
+            	if (inp.contains("cf. ")) {
+            		// rinviamaint
+            		String queryTxt = inp.replaceAll("cf\\.\\s", "");
+            		txt = wrapInternalLink("xref", "dcznrxr", queryTxt, txt);
+//            		queryTxt = queryTxt.replaceAll("\"", "");
+//            		queryTxt = queryTxt.trim();
+//            		try {
+//            			queryTxt = URLEncoder.encode(queryTxt, "utf-8");
+//                		txt = String.format("<a class=\"xref\" href=\"dcznrxr://%s\">%s</a>", queryTxt, txt);
+//					} catch (UnsupportedEncodingException e) {
+//					}
+            	} else {
+            		txt = wrapInternalLink("clipb", "dcznrcb", inp, txt);
+//            		String cbTxt = inp.replaceAll("\"", "");
+//            		cbTxt = cbTxt.trim();
+//            		try {
+//						cbTxt = URLEncoder.encode(cbTxt, "utf-8");
+//	            		txt = String.format("<a class=\"clipb\" href=\"dcznrcb://%s\">%s</a>", cbTxt, txt);
+//					} catch (UnsupportedEncodingException e) {
+//					}
+            	}
+            }
             return out + txt;
         }
         return out;
