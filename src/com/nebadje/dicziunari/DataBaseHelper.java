@@ -138,26 +138,6 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 	}
 
-	/*
-    def fmt(out, key, inp):
-        inp = inp.strip()
-        if inp is not None and len(inp) > 0:
-            txt = u'<span class="%s">%s%s%s</span>' % (key[0], key[1], escape(inp), key[2])
-            if key[0] in [u'wort', u'pled']:
-                # TODO regex "cf. auch: vergleichen" (low prio - only 5 words)
-                p = inp.find(u'cf. ')
-                if p != -1:
-                    newTerm = inp[p+3:].strip()
-                    # We should generate the relative path by our app url part
-                    # and not hard-code it here
-                    txt = '<a class="xref" href="/tschercha/?idiom=%s&term=%s">%s</a>' % \
-                           (IDIOM_NAMES[idiom], urlquote(newTerm), txt)
-                else:
-                    cbTxt = inp.replace("\"", "")
-                    txt = '<a class="clipb" href=\'javascript:clipb("%s")\'>%s</a>' % (cbTxt, txt)
-            out.append(txt)
-
-	 */
 	public static String wrapInternalLink(String linkClass, String linkPrefix, String item, String node) {
 		item = item.replaceAll("\"", "");
 		item = item.trim();
@@ -183,22 +163,8 @@ public class DataBaseHelper extends SQLiteOpenHelper {
             		// rinviamaint
             		String queryTxt = inp.replaceAll("cf\\.\\s", "");
             		txt = wrapInternalLink("xref", "dcznrxr", queryTxt, txt);
-//            		queryTxt = queryTxt.replaceAll("\"", "");
-//            		queryTxt = queryTxt.trim();
-//            		try {
-//            			queryTxt = URLEncoder.encode(queryTxt, "utf-8");
-//                		txt = String.format("<a class=\"xref\" href=\"dcznrxr://%s\">%s</a>", queryTxt, txt);
-//					} catch (UnsupportedEncodingException e) {
-//					}
             	} else {
             		txt = wrapInternalLink("clipb", "dcznrcb", inp, txt);
-//            		String cbTxt = inp.replaceAll("\"", "");
-//            		cbTxt = cbTxt.trim();
-//            		try {
-//						cbTxt = URLEncoder.encode(cbTxt, "utf-8");
-//	            		txt = String.format("<a class=\"clipb\" href=\"dcznrcb://%s\">%s</a>", cbTxt, txt);
-//					} catch (UnsupportedEncodingException e) {
-//					}
             	}
             }
             return out + txt;
@@ -225,7 +191,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 		if (term.length() == 0) {
 			return "";
 		}
-		int limit = 50;
+		int limit = 100;
 		Cursor cursor = myDataBase.query("dicziunari",
 				new String[] {
 					"wort", "beugung", "geschlecht", "bereich",

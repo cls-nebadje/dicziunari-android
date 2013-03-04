@@ -3,6 +3,7 @@ package com.nebadje.dicziunari;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -12,7 +13,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MotionEvent;
@@ -40,6 +40,7 @@ public class MainActivity extends Activity {
 	private HtmlRenderer mRenderer;
 	private String mLastResult = null;
 
+	@SuppressLint("SetJavaScriptEnabled")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
