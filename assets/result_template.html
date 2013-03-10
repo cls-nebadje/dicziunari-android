@@ -3,33 +3,45 @@
 	<style>
 		body {
 			font-family:"arial","sans-serif";
-			font-size: 90%;
+			font-size:90%;
 			margin:0;
 			padding:0;
 			height:100%;
+			width:100%;
 		}
+		
 		#wrapper {
 			min-height:100%;
+			width:100%;
 			position:relative;
 		}
-		#header {
-			padding:3px;
+		
+		#_header {
+			width:100%;
 			background:#ee5;
+		}
+		#_content {
+			width:100%;
+			padding-bottom:70px; /* Height of the footer element plus its padding */
+		}
+		#_footer {
+			width:100%;
+			left:0;
+			height:60px;
+			position:absolute;
+			bottom:0;
+			background:#ee5;
+		}
+		
+		#header {
+			/*padding:3px;*/
 		}
 		#content {
 			padding:10px;
-			padding-bottom:100px; /* Height of the footer element plus its padding */
 		}
 		#footer {
-			padding: 10px;
-			padding-bottom:0px;
-			font-size: 80%;
-			width:100%;
-			height:80px;
-			position:absolute;
-			bottom:0;
-			left:0;
-			background:#ee5;
+			padding:3px;
+			font-size:80%;
 		}
 		table.result {
 			border-collapse: collapse;
@@ -87,21 +99,14 @@
 	</script>
 </head>
 <body>
-    <div id="wrapper">
-	    <div id="header"></div>
-	    <div id="content">
-
-			<!--	
-			<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-			-->
-		    
-			$RESULT
-			
+	    <div id="wrapper">
+			<div id="_header"><div id="header"></div></div>
+			<div id="_content"><div id="content">
+				$RESULT
+			</div></div>
+			<div id="_footer"><div id="footer">
+				Copyright &copy; cls et al 2013 and following. All other trademarks, copyrights, contents are property of their respective owners.
+			</div></div>
 		</div>
-			        
-	    <div id="footer">
-			Copyright &copy; cls et al 2013 and following. All other trademarks, copyrights, contents are property of their respective owners. 
-	    </div>
-    </div>
 </body>
 </html>
