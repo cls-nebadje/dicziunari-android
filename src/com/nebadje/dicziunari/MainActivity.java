@@ -2,17 +2,21 @@ package com.nebadje.dicziunari;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.ArrayList;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.Intent;
 import android.database.SQLException;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.speech.RecognizerIntent;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MotionEvent;
@@ -105,6 +109,7 @@ public class MainActivity extends Activity {
 		mEditText.setOnTouchListener(new OnTouchListener() {
 		    @Override
 		    public boolean onTouch(View v, MotionEvent event) {
+		    	
 		    	Drawable x = mEditText.getCompoundDrawables()[2]; 
 		        if (x == null) {
 		            return false;
@@ -113,8 +118,12 @@ public class MainActivity extends Activity {
 		            return false;
 		        }
 		        if (event.getX() > mEditText.getWidth() - mEditText.getPaddingRight() - x.getIntrinsicWidth()) {
-		        	mEditText.setText("");
-		        	mEditText.setCompoundDrawables(null, null, null, null);
+		        	Editable e = mEditText.getText();
+		        	if (e.length() == 0) {
+		        		startSpeechRecognition();
+		        	} else {
+			        	mEditText.setText("");
+		        	}
 		        }
 		        return false;
 		    }
@@ -126,6 +135,9 @@ public class MainActivity extends Activity {
 		    	if (!mEditText.getText().toString().equals("")) {
 		    		x = getResources().getDrawable(R.drawable.search_clear30);
 		    		x.setBounds(0, 0, x.getIntrinsicWidth(), x.getIntrinsicHeight());		    	
+		    	} else {
+		    		x = getResources().getDrawable(R.drawable.search_speech30);
+		    		x.setBounds(0, 0, x.getIntrinsicWidth(), x.getIntrinsicHeight());		    	
 		    	}
 	    		mEditText.setCompoundDrawables(null, null, x, null);
 		    }
@@ -135,7 +147,11 @@ public class MainActivity extends Activity {
 		    @Override
 		    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 		    }
-		});		
+		});
+		Drawable x = getResources().getDrawable(R.drawable.search_speech30);
+		x.setBounds(0, 0, x.getIntrinsicWidth(), x.getIntrinsicHeight());
+		mEditText.setCompoundDrawables(null, null, x, null);
+		
 		mEditText.setImeActionLabel("Chatta", KeyEvent.KEYCODE_ENTER);		
 		mEditText.setOnEditorActionListener(new OnEditorActionListener() {
 		    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -166,11 +182,31 @@ public class MainActivity extends Activity {
 		return true;
 	}
 
+	protected void startSpeechRecognition()
+	{
+	    Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+	    intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+	            RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+	    //... put other settings in the Intent 
+	    startActivityForResult(intent, 666);		
+	}
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+		if (requestCode == 666 && resultCode == RESULT_OK) {
+			ArrayList<String> results = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+			if (results.size() > 0) {
+				mEditText.setText(results.get(0));
+			}
+		}
+		super.onActivityResult(requestCode, resultCode, data);
+    }
+    
 	public void performSearch() {
 
 		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 		imm.hideSoftInputFromWindow(mEditText.getWindowToken(), 0);
-
+		
 		String query = mEditText.getText().toString();
 		search(query);
 	}
