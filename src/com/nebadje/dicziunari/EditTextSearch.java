@@ -1,5 +1,7 @@
 package com.nebadje.dicziunari;
 
+import java.util.ArrayList;
+
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.text.Editable;
@@ -9,10 +11,13 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
-import android.widget.EditText;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.TextView;
 
-public class EditTextSearch extends EditText {
+public class EditTextSearch extends AutoCompleteTextView {
 	
 	private EditTextSearchHandler mHandler = null;
 	
@@ -69,6 +74,9 @@ public class EditTextSearch extends EditText {
 		    }
 		    @Override
 		    public void afterTextChanged(Editable arg0) {
+		    	if (arg0.length() > 0 && mHandler != null) {
+		    		mHandler.onTextChange();
+		    	}
 		    }
 		    @Override
 		    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -89,6 +97,17 @@ public class EditTextSearch extends EditText {
 		        return false;
 		    }
 		});
+		
+		setOnItemClickListener(new OnItemClickListener() {
+
+	        @Override
+	        public void onItemClick(AdapterView<?> parent, View arg1, int pos,
+	                long id) {
+	    		if (mHandler != null) {
+	    			mHandler.onKeyboardEnter();
+	    		}
+	        }
+	    });
     }
     private void updateCompoundDrawables()
     {
@@ -105,5 +124,13 @@ public class EditTextSearch extends EditText {
     public void setHandler(EditTextSearchHandler handler)
     {
     	mHandler = handler;
+    }
+    public void setSuggestions(ArrayList<String> suggestions)
+    {
+		ArrayAdapter<String> a = new ArrayAdapter<String>(getContext(),
+                android.R.layout.simple_dropdown_item_1line, suggestions);
+		setAdapter(a);
+		setThreshold(2);
+		a.notifyDataSetChanged();
     }
 }

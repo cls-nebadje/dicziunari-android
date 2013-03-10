@@ -18,9 +18,14 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-public class MainActivity extends Activity {
+public class MainActivity
+extends Activity
+{
 
 	public final static String EXTRA_MESSAGE = "com.nebadje.dicziunari.MESSAGE";
 
@@ -33,7 +38,8 @@ public class MainActivity extends Activity {
 	private WebView mResultWebView;
 	private HtmlRenderer mRenderer;
 	private String mLastResult = null;
-
+	ArrayAdapter<String> mSuggestionsAdapter;
+	
 	@SuppressLint("SetJavaScriptEnabled")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -93,7 +99,7 @@ public class MainActivity extends Activity {
 			}
 			
 		});
-		
+
 		mEditText = (EditTextSearch) findViewById(R.id.edit_message);
 		mEditText.setHandler(new EditTextSearchHandler() {
 			void onSpeechRecognition() {
@@ -101,9 +107,12 @@ public class MainActivity extends Activity {
 			}
 			void onKeyboardEnter() {
 				performSearch();
-			}			
+			}
+			void onTextChange() {
+				suggest();
+			}
 		});
-
+		
 		// Load a page
 		if (mLastResult == null) {
 			// load default page
@@ -114,14 +123,27 @@ public class MainActivity extends Activity {
 				"text/html",
                 "UTF-8", null);
 	}
-
+	private void suggest()
+	{
+		// TODO: Timeout to search for suggestions
+		String query = mEditText.getText().toString();
+		if (mIdiom == Idiom.Vallader) {
+			mEditText.setSuggestions(mDbHelperVallader.suggestionsForQuery(query, true, 15));
+		} else {
+			mEditText.setSuggestions(mDbHelperPuter.suggestionsForQuery(query, true, 15));
+		}
+	}
+    
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
-
+	/* NOTE: We should check if speech recogn. is supported at all and
+	 * en-/disable the support for it accordingly
+	 * http://stackoverflow.com/questions/4734030/voice-to-text-on-android-in-offline-mode
+	 */
 	protected void startSpeechRecognition()
 	{
 	    Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);

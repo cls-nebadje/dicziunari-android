@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -222,4 +223,42 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 				
 		return result;
 	}
+	public ArrayList<String> suggestionsForQuery(String query,
+			boolean deutsch,
+			int max)
+	{
+		ArrayList<String> suggestions = new ArrayList<String> ();
+		if (query.length() == 0) {
+			return suggestions;
+		}
+		String sql;
+		if (deutsch) {
+			sql = "wort LIKE ? LIMIT 0, ?";
+		} else {
+			sql = "pled LIKE ? LIMIT 0, ?";
+		}
+		String limit = String.valueOf(max);
+		String like = query + "%";
+		Cursor cursor = myDataBase.query("dicziunari",
+				deutsch ? new String[] {"wort"} : new String[] {"pled"},
+				sql,
+				new String[] {like, limit},
+				null,
+				null,
+				null);
+		if (cursor != null) {
+			if (cursor.moveToFirst()) {								
+				do {
+					String word;
+					word = cursor.getString(cursor.getColumnIndex(deutsch?"wort":"pled"));
+					word = word.trim();					
+					if (word.length() > 0) {
+						suggestions.add(word);
+					}
+				} while (cursor.moveToNext());
+			}
+		}
+		return suggestions;
+	}
+
 }
