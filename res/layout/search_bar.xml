@@ -7,7 +7,7 @@
     android:orientation="horizontal" >
     <!-- android:layout_height="match_parent" -->
     
-   	<EditText
+   	<com.nebadje.dicziunari.EditTextSearch
    	    android:id="@+id/edit_message"
    	    android:layout_width="0dp"
    	    android:layout_height="wrap_content"

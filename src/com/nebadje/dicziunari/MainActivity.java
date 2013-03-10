@@ -11,24 +11,14 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.database.SQLException;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.util.Log;
-import android.view.KeyEvent;
 import android.view.Menu;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnTouchListener;
-import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.TextView.OnEditorActionListener;
 
 public class MainActivity extends Activity {
 
@@ -39,7 +29,7 @@ public class MainActivity extends Activity {
 	private DataBaseHelper mDbHelperVallader;
 	private DataBaseHelper mDbHelperPuter;
 	private Idiom mIdiom;
-	private EditText mEditText;
+	private EditTextSearch mEditText;
 	private WebView mResultWebView;
 	private HtmlRenderer mRenderer;
 	private String mLastResult = null;
@@ -104,64 +94,14 @@ public class MainActivity extends Activity {
 			
 		});
 		
-		// http://stackoverflow.com/questions/4175398/clear-edittext-on-click
-		mEditText = (EditText) findViewById(R.id.edit_message);
-		mEditText.setOnTouchListener(new OnTouchListener() {
-		    @Override
-		    public boolean onTouch(View v, MotionEvent event) {
-		    	
-		    	Drawable x = mEditText.getCompoundDrawables()[2]; 
-		        if (x == null) {
-		            return false;
-		        }
-		        if (event.getAction() != MotionEvent.ACTION_UP) {
-		            return false;
-		        }
-		        if (event.getX() > mEditText.getWidth() - mEditText.getPaddingRight() - x.getIntrinsicWidth()) {
-		        	Editable e = mEditText.getText();
-		        	if (e.length() == 0) {
-		        		startSpeechRecognition();
-		        	} else {
-			        	mEditText.setText("");
-		        	}
-		        }
-		        return false;
-		    }
-		});
-		mEditText.addTextChangedListener(new TextWatcher() {
-		    @Override
-		    public void onTextChanged(CharSequence s, int start, int before, int count) {
-		    	Drawable x = null;
-		    	if (!mEditText.getText().toString().equals("")) {
-		    		x = getResources().getDrawable(R.drawable.search_clear30);
-		    		x.setBounds(0, 0, x.getIntrinsicWidth(), x.getIntrinsicHeight());		    	
-		    	} else {
-		    		x = getResources().getDrawable(R.drawable.search_speech30);
-		    		x.setBounds(0, 0, x.getIntrinsicWidth(), x.getIntrinsicHeight());		    	
-		    	}
-	    		mEditText.setCompoundDrawables(null, null, x, null);
-		    }
-		    @Override
-		    public void afterTextChanged(Editable arg0) {
-		    }
-		    @Override
-		    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-		    }
-		});
-		Drawable x = getResources().getDrawable(R.drawable.search_speech30);
-		x.setBounds(0, 0, x.getIntrinsicWidth(), x.getIntrinsicHeight());
-		mEditText.setCompoundDrawables(null, null, x, null);
-		
-		mEditText.setImeActionLabel("Chatta", KeyEvent.KEYCODE_ENTER);		
-		mEditText.setOnEditorActionListener(new OnEditorActionListener() {
-		    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-		    	// http://stackoverflow.com/questions/9327458/get-keycode-0-instead-of-66-when-enter-is-pressed-on-my-computer-keyboard
-		        if (actionId == EditorInfo.IME_NULL) {
-		    		performSearch();
-		            return true;
-		        }
-		        return false;
-		    }
+		mEditText = (EditTextSearch) findViewById(R.id.edit_message);
+		mEditText.setHandler(new EditTextSearchHandler() {
+			void onSpeechRecognition() {
+				startSpeechRecognition();
+			}
+			void onKeyboardEnter() {
+				performSearch();
+			}			
 		});
 
 		// Load a page
