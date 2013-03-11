@@ -11,6 +11,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.database.SQLException;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.view.Menu;
@@ -18,8 +19,6 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
@@ -39,6 +38,28 @@ extends Activity
 	private HtmlRenderer mRenderer;
 	private String mLastResult = null;
 	ArrayAdapter<String> mSuggestionsAdapter;
+	
+	private class Suggest extends AsyncTask<Void, Void, Void> 
+	{
+		private String mQuery;
+		protected void onPreExecute() {
+			mQuery = mEditText.getText().toString();
+		}
+		private ArrayList<String> mSuggestions;
+	    protected Void doInBackground(Void... arg0) {
+			if (mIdiom == Idiom.Vallader) {
+				mSuggestions = mDbHelperVallader.suggestionsForQuery(mQuery, true, 20);
+			} else {
+				mSuggestions = mDbHelperPuter.suggestionsForQuery(mQuery, true, 20);
+			}
+			return null;
+	     }
+	     protected void onPostExecute(Void arg0) {
+	    	 mEditText.setSuggestions(mSuggestions);
+	    	 mSuggestTask = null;
+	     }
+	}
+	Suggest mSuggestTask = null;
 	
 	@SuppressLint("SetJavaScriptEnabled")
 	@Override
@@ -109,7 +130,11 @@ extends Activity
 				performSearch();
 			}
 			void onTextChange() {
-				suggest();
+				if (mSuggestTask != null) {
+					mSuggestTask.cancel(true);
+				}
+				mSuggestTask = new Suggest();
+				mSuggestTask.execute();
 			}
 		});
 		
@@ -122,16 +147,6 @@ extends Activity
 				mLastResult,
 				"text/html",
                 "UTF-8", null);
-	}
-	private void suggest()
-	{
-		// TODO: Timeout to search for suggestions
-		String query = mEditText.getText().toString();
-		if (mIdiom == Idiom.Vallader) {
-			mEditText.setSuggestions(mDbHelperVallader.suggestionsForQuery(query, true, 15));
-		} else {
-			mEditText.setSuggestions(mDbHelperPuter.suggestionsForQuery(query, true, 15));
-		}
 	}
     
 	@Override
@@ -150,6 +165,7 @@ extends Activity
 	    intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
 	            RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
 	    //... put other settings in the Intent 
+	    // TODO: Choose better ID...
 	    startActivityForResult(intent, 666);		
 	}
     @Override
@@ -165,9 +181,12 @@ extends Activity
     }
     
 	public void performSearch() {
-
+		// Hide keyboard
 		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 		imm.hideSoftInputFromWindow(mEditText.getWindowToken(), 0);
+
+		// Hide suggestions in case we hit enter without selection any
+		mEditText.dismissDropDown();
 		
 		String query = mEditText.getText().toString();
 		search(query);

@@ -17,8 +17,8 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.TextView;
 
-public class EditTextSearch extends AutoCompleteTextView {
-	
+public class EditTextSearch extends AutoCompleteTextView
+{	
 	private EditTextSearchHandler mHandler = null;
 	
     public EditTextSearch(Context context)

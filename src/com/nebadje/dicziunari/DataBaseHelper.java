@@ -233,12 +233,13 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 		}
 		String sql;
 		if (deutsch) {
-			sql = "wort LIKE ? LIMIT 0, ?";
+			sql = "wort LIKE ? GROUP BY wort LIMIT 0, ?";
 		} else {
-			sql = "pled LIKE ? LIMIT 0, ?";
+			sql = "pled LIKE ? GROUP BY pled LIMIT 0, ?";
 		}
 		String limit = String.valueOf(max);
 		String like = query + "%";
+		String group = deutsch ? "wort" : "pled";
 		Cursor cursor = myDataBase.query("dicziunari",
 				deutsch ? new String[] {"wort"} : new String[] {"pled"},
 				sql,
